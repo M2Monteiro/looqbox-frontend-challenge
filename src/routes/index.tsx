@@ -1,15 +1,26 @@
-import { createBrowserRouter } from "react-router";
-import { Layout } from "@/components/Layout";
-import { Home } from "@/routes/home";
+import { createBrowserRouter } from 'react-router';
+import { PokemonHome } from '@/routes/home';
+import { MainLayout } from '@/components/layouts/MainLayout';
+import { PokemonDetails } from '@/features/pokemon/pages/Details';
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Layout />,
+    path: '/',
+    element: <MainLayout />,
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <PokemonHome />,
+      },
+    ],
+  },
+  {
+    path: '/details/:name',
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <PokemonDetails />,
       },
     ],
   },

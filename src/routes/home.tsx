@@ -1,5 +1,5 @@
-import { Welcome } from "@/features/welcome/welcome";
+import { PokemonHomePage } from '@/features/pokemon/pages/Home';
 
-export function Home() {
-  return <Welcome />;
+export function PokemonHome() {
+  return <PokemonHomePage />;
 }

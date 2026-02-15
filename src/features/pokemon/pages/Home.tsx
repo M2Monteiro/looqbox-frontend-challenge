@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from '@/app/hook';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { PokemonCard } from '../components/PokemonCard';
 import { PokemonNavBar } from '../components/PokemonNavBar';
 import { useEffect } from 'react';
