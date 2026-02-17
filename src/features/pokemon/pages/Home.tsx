@@ -1,36 +1,58 @@
-import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { PokemonCard } from '../components/PokemonCard';
 import { PokemonNavBar } from '../components/PokemonNavBar';
-import { useEffect } from 'react';
-import { fetchPokemons } from '../pokemonSlice';
+import { Pagination, Row, type PaginationProps } from 'antd';
+import { usePokemon } from '@/features/hooks/usePokemon';
+import { PokemonModal } from '../components/PokemonModal';
+import { usePokemonList } from '@/features/hooks/usePokemonList';
 
 export function PokemonHomePage() {
-  const dispatch = useAppDispatch();
+  const { list: pokemons, loading, error, search, setSearch } =
+    usePokemonList();
 
-  const { list, loading, error } = useAppSelector((state) => state.pokemon);
+  const {
+    pokemon,
+    loading: loadingDetails,
+    modalOpen,
+    fetchPokemonDetails,
+    closeModal,
+  } = usePokemon();
 
-  useEffect(() => {
-    if (list.length === 0) {
-      dispatch(fetchPokemons());
-    }
-  }, []);
-
-  if (loading) {
-    return <p>Carregando pokémons...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
+  const onShowSizeChange: PaginationProps['onShowSizeChange'] = (
+    current,
+    pageSize
+  ) => {
+    console.log(current, pageSize);
+  };
 
   return (
     <>
-      <PokemonNavBar />
-      <div className="pokemon-grid">
-        {list.map((pokemon) => (
-          <PokemonCard key={pokemon.name} name={pokemon.name} />
+      <PokemonNavBar search={search} onSearch={setSearch} />
+
+      <Row justify="space-around">
+        {pokemons.map((p) => (
+          <PokemonCard
+            key={p.name}
+            name={p.name}
+            url={p.url}
+            onOpenDetails={fetchPokemonDetails}
+          />
         ))}
-      </div>
+      </Row>
+
+      <PokemonModal
+        open={modalOpen}
+        loading={loadingDetails}
+        pokemon={pokemon}
+        onClose={closeModal}
+      />
+
+      <Pagination
+        align="center"
+        showSizeChanger
+        onShowSizeChange={onShowSizeChange}
+        defaultCurrent={1}
+        total={100}
+      />
     </>
   );
 }

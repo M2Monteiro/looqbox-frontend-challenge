@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
-import { PokemonHome } from '@/routes/home';
 import { MainLayout } from '@/components/layouts/MainLayout';
 import { PokemonDetails } from '@/features/pokemon/pages/Details';
+import { PokemonHomePage } from '@/features/pokemon/pages/Home';
 
 export const router = createBrowserRouter([
   {
@@ -10,7 +10,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PokemonHome />,
+        element: <PokemonHomePage />,
       },
     ],
   },

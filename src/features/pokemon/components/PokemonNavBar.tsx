@@ -1,7 +1,58 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Col, Input, Row } from 'antd';
+import { Col, Divider, Input, Row, Tag, Typography } from 'antd';
 
-export function PokemonNavBar() {
+const { Text } = Typography;
+
+const typeEmoji = {
+  normal: '⭐',
+  fighting: '👊',
+  flying: '🦅',
+  poison: '☠️',
+  ground: '🌍',
+  rock: '🪨',
+  bug: '🐛',
+  ghost: '👻',
+  steel: '⚙️',
+  fire: '🔥',
+  water: '💧',
+  grass: '🌿',
+  electric: '⚡',
+  psychic: '🔮',
+  ice: '❄️',
+  dragon: '🐉',
+  dark: '🌑',
+  fairy: '✨',
+  stellar: '',
+  unknown: '',
+};
+
+const typeColors = {
+  fire: '#FF6B35',
+  water: '#4FC3F7',
+  grass: '#66BB6A',
+  electric: '#FFD600',
+  psychic: '#F48FB1',
+  ice: '#80DEEA',
+  dragon: '#7E57C2',
+  dark: '#546E7A',
+  fairy: '#F06292',
+  normal: '#BCAAA4',
+  fighting: '#EF5350',
+  flying: '#90CAF9',
+  poison: '#AB47BC',
+  ground: '#FFA726',
+  rock: '#8D6E63',
+  bug: '#9CCC65',
+  ghost: '#7C4DFF',
+  steel: '#78909C',
+};
+
+interface PokemonNavBarProps {
+  search?: string;
+  onSearch: (text: string) => void;
+}
+
+export function PokemonNavBar({ search = '', onSearch }: PokemonNavBarProps) {
   return (
     <nav>
       <Row gutter={16}>
@@ -75,12 +126,30 @@ export function PokemonNavBar() {
             size="large"
             placeholder="Buscar por nome ou id..."
             prefix={<SearchOutlined />}
+            value={search}
+            onChange={(e) => onSearch(e.target.value)}
+            allowClear
           />
         </Col>
       </Row>
-      <div>Tipo pokemon</div>
 
-      <div className="w-full h-px bg-gray-700"></div>
+      {Object.entries(typeColors).map(([type, color]) => (
+        <Tag
+          key={type}
+          color={color}
+          style={{
+            fontSize: 12,
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            margin: '4px 6px 0px 6px',
+          }}
+        >
+          <Text>
+            {typeEmoji[type as keyof typeof typeEmoji]} {type}
+          </Text>
+        </Tag>
+      ))}
+      <Divider style={{ borderColor: '#7cb305' }} />
     </nav>
   );
 }

@@ -8,7 +8,7 @@ import {
 
 import type { RootState } from '@/app/store';
 import * as service from './pokemonService';
-import type { Pokemon } from './pokemonTypes';
+import type { Pokemon, Pokemons } from './pokemonTypes';
 
 const persistedCache =
   loadFromStorage<Record<string, any>>('pokemon-cache') || {};
@@ -16,7 +16,7 @@ const persistedCache =
 const persistedList = loadFromStorage<any[]>('pokemon-list') || [];
 
 interface PokemonState {
-  list: Pokemon[];
+  list: Pokemons[];
   cache: Record<string, Pokemon>;
   selected: Pokemon | null;
   loading: boolean;
@@ -32,12 +32,17 @@ const initialState: PokemonState = {
 };
 
 // LISTA
-export const fetchPokemons = createAsyncThunk('pokemon/fetchAll', async () => {
-  return await service.getPokemons();
+export const fetchPokemons = createAsyncThunk<
+  { results: Pokemons[] },
+  { limit?: number; offset?: number } | void
+>('pokemon/fetchAll', async (params) => {
+  const limit = typeof params === 'object' && params?.limit ? params.limit : undefined;
+  const offset = typeof params === 'object' && params?.offset ? params.offset : undefined;
+  return await service.getPokemons(limit, offset);
 });
 
 // DETALHE COM CACHE
-export const fetchPokemonByName = createAsyncThunk(
+export const fetchPokemonByName = createAsyncThunk<Pokemon, string>(
   'pokemon/fetchByName',
   async (name: string, { getState }) => {
     const state = getState() as RootState;

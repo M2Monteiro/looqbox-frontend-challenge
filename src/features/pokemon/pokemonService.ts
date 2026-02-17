@@ -1,6 +1,6 @@
 import { pokeApi } from '@/services/api';
 
-export async function getPokemons(limit = 20, offset = 0) {
+export async function getPokemons(limit = 10, offset = 0) {
   const response = await pokeApi.get('/pokemon', {
     params: {
       limit,
