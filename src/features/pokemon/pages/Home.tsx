@@ -40,21 +40,26 @@ export function PokemonHomePage() {
         </div>
       ) : (
         <>
-          <Row gutter={[16, 16]}>
-            {displayList.map((p) => (
-              <Col key={p.name} xs={24} sm={12} md={8} lg={6}>
-                <PokemonCard
-                  name={p.name}
-                  url={p.url}
-                  onOpenDetails={fetchPokemonDetails}
-                />
-              </Col>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {displayList.map((p, index) => (
+              <PokemonCard
+                key={`${p.name}-${index}`}
+                name={p.name}
+                url={p.url}
+                onOpenDetails={fetchPokemonDetails}
+              />
             ))}
-          </Row>
+          </div>
 
           {!isSearching && (
-            <div style={{ marginTop: 32, textAlign: 'center' }}>
-              <Pagination {...pagination} />
+            <div style={{ margin: 32, textAlign: 'center' }}>
+              <Pagination align="center" {...pagination} />
             </div>
           )}
         </>

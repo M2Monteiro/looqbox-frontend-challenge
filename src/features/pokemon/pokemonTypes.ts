@@ -22,10 +22,16 @@ interface PokemonSprites {
   back_default: string;
   front_default: string;
   front_shiny: string;
-  showdown: {
-    back_default: string;
-    front_default: string;
-    front_shiny: string;
+  other: {
+    'official-artwork': {
+      front_default: string;
+      front_shiny: string;
+    };
+    showdown: {
+      back_default: string;
+      front_default: string;
+      front_shiny: string;
+    };
   };
 }
 interface PokemonStats {

@@ -133,22 +133,24 @@ export function PokemonNavBar({ search = '', onSearch }: PokemonNavBarProps) {
         </Col>
       </Row>
 
-      {Object.entries(typeColors).map(([type, color]) => (
-        <Tag
-          key={type}
-          color={color}
-          style={{
-            fontSize: 12,
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            margin: '4px 6px 0px 6px',
-          }}
-        >
-          <Text>
-            {typeEmoji[type as keyof typeof typeEmoji]} {type}
-          </Text>
-        </Tag>
-      ))}
+      <div style={{ margin: '16px 0' }}>
+        {Object.entries(typeColors).map(([type, color]) => (
+          <Tag
+            key={type}
+            color={color}
+            style={{
+              fontSize: 12,
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              margin: '4px 6px 0px 6px',
+            }}
+          >
+            <Text>
+              {typeEmoji[type as keyof typeof typeEmoji]} {type}
+            </Text>
+          </Tag>
+        ))}
+      </div>
       <Divider style={{ borderColor: '#7cb305' }} />
     </nav>
   );

@@ -1,4 +1,7 @@
-import { Image, Card, Flex, Typography } from 'antd';
+import { usePokemon } from '@/features/hooks/usePokemon';
+import { Image, Card, Flex, Typography, Row } from 'antd';
+import { useState } from 'react';
+import type { Pokemon } from '../pokemonTypes';
 
 const { Text } = Typography;
 
@@ -10,7 +13,15 @@ interface Props {
 
 export function PokemonCard({ name, url, onOpenDetails }: Props) {
   const id = url.split('/').filter(Boolean).pop();
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/${id}.gif`;
+  const [imageUrl, setImageUrl] = useState(
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/${id}.gif`
+  );
+
+  const handleImageError = () => {
+    setImageUrl(
+      `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+    );
+  };
 
   return (
     <Card
@@ -22,17 +33,29 @@ export function PokemonCard({ name, url, onOpenDetails }: Props) {
         marginBottom: 8,
         background: 'linear-gradient(145deg, rgb(17, 17, 17), rgb(22, 22, 37))',
         cursor: 'pointer',
+        border: 'none',
       }}
     >
-      <Flex gap={2} align="center" style={{ padding: '20px 16px' }} vertical>
+      <Flex
+        gap={2}
+        align="center"
+        justify="end"
+        style={{ padding: '20px 16px' }}
+        vertical
+      >
         <Image
           width={100}
           src={imageUrl}
           alt={`pokemon ${name}`}
           preview={false}
+          onError={handleImageError}
         />
-        <Text>#{id}</Text>
-        <Text>{name}</Text>
+        <Row align="bottom">
+          <Text style={{ color: '#fff', marginRight: 12 }}>#{id}</Text>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 600 }}>
+            {name}
+          </Text>
+        </Row>
       </Flex>
     </Card>
   );

@@ -142,7 +142,7 @@ const pokemonSlice = createSlice({
             name: pokemon.name,
             url: `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`,
           });
-          saveToStorage('pokemon-list', state.list);
+          // saveToStorage('pokemon-list', state.list);
         }
 
         saveToStorage('pokemon-cache', state.cache);

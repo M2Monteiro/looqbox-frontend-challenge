@@ -12,7 +12,7 @@ export function MainLayout() {
   return (
     <Flex gap={'middle'} align="center" justify="center" vertical>
       <Layout style={layoutStyle}>
-        <main>
+        <main style={{ marginTop: 16 }}>
           <Outlet />
         </main>
       </Layout>
