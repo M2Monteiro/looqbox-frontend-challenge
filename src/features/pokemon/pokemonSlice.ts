@@ -8,7 +8,7 @@ import {
 
 import type { RootState } from '@/app/store';
 import * as service from './pokemonService';
-import type { Pokemon, Pokemons } from './pokemonTypes';
+import type { Pokemon, PokemonListItem, Pokemons } from './pokemonTypes';
 
 const persistedCache =
   loadFromStorage<Record<string, any>>('pokemon-cache') || {};
@@ -16,28 +16,45 @@ const persistedCache =
 const persistedList = loadFromStorage<any[]>('pokemon-list') || [];
 
 interface PokemonState {
-  list: Pokemons[];
+  list: PokemonListItem[];
   cache: Record<string, Pokemon>;
   selected: Pokemon | null;
-  loading: boolean;
+  loadingList: boolean;
+  loadingDetails: boolean;
   error: string | null;
+  pagination: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    currentPage: number;
+    pageSize: number;
+  };
 }
 
 const initialState: PokemonState = {
   list: persistedList,
   cache: persistedCache,
   selected: null,
-  loading: false,
+  loadingList: false,
+  loadingDetails: false,
   error: null,
+  pagination: {
+    count: 0,
+    next: null,
+    previous: null,
+    currentPage: 1,
+    pageSize: 10,
+  },
 };
 
 // LISTA
 export const fetchPokemons = createAsyncThunk<
-  { results: Pokemons[] },
+  Pokemons,
   { limit?: number; offset?: number } | void
 >('pokemon/fetchAll', async (params) => {
-  const limit = typeof params === 'object' && params?.limit ? params.limit : undefined;
-  const offset = typeof params === 'object' && params?.offset ? params.offset : undefined;
+  const limit = typeof params === 'object' && params?.limit ? params.limit : 10;
+  const offset =
+    typeof params === 'object' && params?.offset ? params.offset : 0;
   return await service.getPokemons(limit, offset);
 });
 
@@ -75,40 +92,64 @@ const pokemonSlice = createSlice({
 
       // LISTA
       .addCase(fetchPokemons.pending, (state) => {
-        state.loading = true;
+        state.loadingList = true;
         state.error = null;
       })
 
       .addCase(fetchPokemons.fulfilled, (state, action) => {
-        state.loading = false;
+        state.loadingList = false;
         state.list = action.payload.results;
 
-        saveToStorage('pokemon-list', state.list);
+        state.pagination.count = action.payload.count;
+        state.pagination.next = action.payload.next;
+        state.pagination.previous = action.payload.previous;
+
+        if (action.payload.previous === null) {
+          state.pagination.currentPage = 1;
+        } else {
+          const url = new URL(
+            action.payload.next || action.payload.previous || ''
+          );
+          const offset = parseInt(url.searchParams.get('offset') || '0');
+          state.pagination.currentPage =
+            Math.floor(offset / state.pagination.pageSize) + 1;
+        }
+
+        // saveToStorage('pokemon-list', state.list);
       })
 
       .addCase(fetchPokemons.rejected, (state) => {
-        state.loading = false;
+        state.loadingList = false;
         state.error = 'Erro ao buscar pokémons';
       })
 
       // DETALHE
       .addCase(fetchPokemonByName.pending, (state) => {
-        state.loading = true;
+        state.loadingDetails = true;
         state.error = null;
       })
 
       .addCase(fetchPokemonByName.fulfilled, (state, action) => {
         const pokemon = action.payload;
 
-        state.loading = false;
+        state.loadingDetails = false;
         state.selected = pokemon;
         state.cache[pokemon.name] = pokemon;
+
+        const alreadyInList = state.list.some((p) => p.name === pokemon.name);
+        if (!alreadyInList) {
+          state.list.push({
+            name: pokemon.name,
+            url: `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`,
+          });
+          saveToStorage('pokemon-list', state.list);
+        }
 
         saveToStorage('pokemon-cache', state.cache);
       })
 
       .addCase(fetchPokemonByName.rejected, (state) => {
-        state.loading = false;
+        state.loadingDetails = false;
         state.error = 'Erro ao buscar Pokémon';
       });
   },

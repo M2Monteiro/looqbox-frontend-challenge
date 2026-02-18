@@ -1,5 +1,5 @@
-import { SearchOutlined } from '@ant-design/icons';
 import { Col, Divider, Input, Row, Tag, Typography } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 

@@ -1,6 +1,11 @@
 export interface Pokemons {
-  name: string;
-  url: string;
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    name: string;
+    url: string;
+  }[];
 }
 
 export interface Pokemon {
@@ -39,3 +44,5 @@ interface PokemonTypes {
     url: string;
   };
 }
+
+export type PokemonListItem = Pokemons['results'][number];

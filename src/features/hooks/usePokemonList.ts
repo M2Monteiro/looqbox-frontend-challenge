@@ -1,9 +1,14 @@
-import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useEffect, useMemo, useState } from 'react';
-import { fetchPokemons } from '../pokemon/pokemonSlice';
-import type { Pokemons } from '../pokemon/pokemonTypes';
 
-function filterPokemons(list: Pokemons[], search: string): Pokemons[] {
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+
+import { fetchPokemonByName, fetchPokemons } from '../pokemon/pokemonSlice';
+import type { PokemonListItem } from '../pokemon/pokemonTypes';
+
+function filterPokemons(
+  list: PokemonListItem[],
+  search: string
+): PokemonListItem[] {
   if (!search.trim()) return list;
 
   const term = search.toLowerCase().trim();
@@ -21,13 +26,31 @@ export function usePokemonList() {
   const [search, setSearch] = useState('');
 
   const dispatch = useAppDispatch();
-  const { list, loading, error } = useAppSelector((state) => state.pokemon);
+  const { list, loadingList, error } = useAppSelector((state) => state.pokemon);
 
   useEffect(() => {
     if (list.length === 0) {
       dispatch(fetchPokemons());
     }
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!search.trim()) return;
+
+    const term = search.toLowerCase().trim();
+    const found = list.some((p) => {
+      const id = p.url.split('/').filter(Boolean).pop() ?? '';
+      return p.name.toLowerCase().includes(term) || id === term;
+    });
+
+    if (!found) {
+      const debounce = setTimeout(() => {
+        dispatch(fetchPokemonByName(term));
+      }, 500); // aguarda o usuário parar de digitar
+
+      return () => clearTimeout(debounce);
+    }
+  }, [search, list, dispatch]);
 
   const filteredList = useMemo(
     () => filterPokemons(list, search),
@@ -36,7 +59,7 @@ export function usePokemonList() {
 
   return {
     list: filteredList,
-    loading,
+    loadingList,
     error,
     search,
     setSearch,

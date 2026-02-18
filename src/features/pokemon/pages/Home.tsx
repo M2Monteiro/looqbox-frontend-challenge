@@ -1,57 +1,70 @@
+import { Col, Pagination, Row, Spin, Empty } from 'antd';
+
 import { PokemonCard } from '../components/PokemonCard';
 import { PokemonNavBar } from '../components/PokemonNavBar';
-import { Pagination, Row, type PaginationProps } from 'antd';
-import { usePokemon } from '@/features/hooks/usePokemon';
 import { PokemonModal } from '../components/PokemonModal';
+
+import { usePokemon } from '@/features/hooks/usePokemon';
 import { usePokemonList } from '@/features/hooks/usePokemonList';
+import { usePokemonPagination } from '@/features/hooks/usePokemonPagination';
 
 export function PokemonHomePage() {
-  const { list: pokemons, loading, error, search, setSearch } =
-    usePokemonList();
+  const { list: filteredPokemons, search, setSearch } = usePokemonList();
+
+  const { listPagination, loadingPagination, pagination } =
+    usePokemonPagination();
 
   const {
     pokemon,
-    loading: loadingDetails,
+    loadingDetails,
     modalOpen,
     fetchPokemonDetails,
     closeModal,
   } = usePokemon();
 
-  const onShowSizeChange: PaginationProps['onShowSizeChange'] = (
-    current,
-    pageSize
-  ) => {
-    console.log(current, pageSize);
-  };
+  const isSearching = search.trim().length > 0;
+  const displayList = isSearching ? filteredPokemons : listPagination;
+  const isLoading = loadingPagination && !isSearching;
 
   return (
     <>
       <PokemonNavBar search={search} onSearch={setSearch} />
 
-      <Row justify="space-around">
-        {pokemons.map((p) => (
-          <PokemonCard
-            key={p.name}
-            name={p.name}
-            url={p.url}
-            onOpenDetails={fetchPokemonDetails}
-          />
-        ))}
-      </Row>
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <Spin size="large" />
+        </div>
+      ) : displayList.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <Empty description="Nenhum Pokémon encontrado" />
+        </div>
+      ) : (
+        <>
+          <Row gutter={[16, 16]}>
+            {displayList.map((p) => (
+              <Col key={p.name} xs={24} sm={12} md={8} lg={6}>
+                <PokemonCard
+                  name={p.name}
+                  url={p.url}
+                  onOpenDetails={fetchPokemonDetails}
+                />
+              </Col>
+            ))}
+          </Row>
+
+          {!isSearching && (
+            <div style={{ marginTop: 32, textAlign: 'center' }}>
+              <Pagination {...pagination} />
+            </div>
+          )}
+        </>
+      )}
 
       <PokemonModal
         open={modalOpen}
         loading={loadingDetails}
         pokemon={pokemon}
         onClose={closeModal}
-      />
-
-      <Pagination
-        align="center"
-        showSizeChanger
-        onShowSizeChange={onShowSizeChange}
-        defaultCurrent={1}
-        total={100}
       />
     </>
   );

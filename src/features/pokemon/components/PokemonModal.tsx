@@ -1,4 +1,5 @@
 import { Divider, Flex, Modal, Spin, Tag, Image } from 'antd';
+
 import type { Pokemon } from '../pokemonTypes';
 
 const typeColors: Record<string, string> = {
