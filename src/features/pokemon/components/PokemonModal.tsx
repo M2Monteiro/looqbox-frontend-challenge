@@ -10,27 +10,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useState } from 'react';
-
-const typeColors: Record<string, string> = {
-  fire: '#FF6B35',
-  water: '#4FC3F7',
-  grass: '#66BB6A',
-  electric: '#FFD600',
-  psychic: '#F48FB1',
-  ice: '#80DEEA',
-  dragon: '#7E57C2',
-  dark: '#546E7A',
-  fairy: '#F06292',
-  normal: '#BCAAA4',
-  fighting: '#EF5350',
-  flying: '#90CAF9',
-  poison: '#AB47BC',
-  ground: '#FFA726',
-  rock: '#8D6E63',
-  bug: '#9CCC65',
-  ghost: '#7C4DFF',
-  steel: '#78909C',
-};
+import { typeColors } from '@/utils/pokemonColors';
+import { TypeDetailsCard } from './TypeDetailsCard';
 
 interface PokemonModalProps {
   open: boolean;
@@ -154,6 +135,8 @@ function PokemonModalContent({ pokemon }: { pokemon: Pokemon }) {
             />
           </RadarChart>
         </ResponsiveContainer>
+
+        <TypeDetailsCard />
       </Flex>
     </Flex>
   );

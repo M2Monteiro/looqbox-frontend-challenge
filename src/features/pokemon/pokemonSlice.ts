@@ -8,7 +8,12 @@ import {
 
 import type { RootState } from '@/app/store';
 import * as service from './pokemonService';
-import type { Pokemon, PokemonListItem, Pokemons } from './pokemonTypes';
+import type {
+  Pokemon,
+  PokemonListItem,
+  Pokemons,
+  PokemonTypeResponse,
+} from './pokemonTypes';
 
 const persistedCache =
   loadFromStorage<Record<string, any>>('pokemon-cache') || {};
@@ -19,6 +24,9 @@ interface PokemonState {
   list: PokemonListItem[];
   cache: Record<string, Pokemon>;
   selected: Pokemon | null;
+  typeFilter: string | null;
+  filteredByType: PokemonListItem[];
+  typeDetails: PokemonTypeResponse | null;
   loadingList: boolean;
   loadingDetails: boolean;
   error: string | null;
@@ -35,6 +43,9 @@ const initialState: PokemonState = {
   list: persistedList,
   cache: persistedCache,
   selected: null,
+  typeFilter: null,
+  filteredByType: [],
+  typeDetails: null,
   loadingList: false,
   loadingDetails: false,
   error: null,
@@ -74,6 +85,14 @@ export const fetchPokemonByName = createAsyncThunk<Pokemon, string>(
   }
 );
 
+// DETALHE DO TYPE DO POKEMON
+export const fetchPokemonsByType = createAsyncThunk(
+  'pokemon/fetchByType',
+  async (type: string) => {
+    return await service.getTypeById(type);
+  }
+);
+
 const pokemonSlice = createSlice({
   name: 'pokemon',
   initialState,
@@ -84,6 +103,11 @@ const pokemonSlice = createSlice({
     clearCache(state) {
       state.cache = {};
       removeFromStorage('pokemon-cache');
+    },
+    clearTypeFilter(state) {
+      state.typeFilter = null;
+      state.filteredByType = [];
+      state.typeDetails = null;
     },
   },
 
@@ -151,11 +175,31 @@ const pokemonSlice = createSlice({
       .addCase(fetchPokemonByName.rejected, (state) => {
         state.loadingDetails = false;
         state.error = 'Erro ao buscar Pokémon';
+      })
+
+      // Types
+      .addCase(fetchPokemonsByType.pending, (state) => {
+        state.loadingList = true;
+        state.error = null;
+      })
+      .addCase(fetchPokemonsByType.fulfilled, (state, action) => {
+        state.loadingList = false;
+
+        state.typeDetails = action.payload;
+        state.filteredByType = action.payload.pokemon.map((p: any) => ({
+          name: p.pokemon.name,
+          url: p.pokemon.url,
+        }));
+        state.typeFilter = action.meta.arg;
+      })
+      .addCase(fetchPokemonsByType.rejected, (state) => {
+        state.loadingList = false;
+        state.error = 'Erro ao buscar pokémons por tipo';
       });
   },
 });
 
-export const { clearSelected } = pokemonSlice.actions;
-export const { clearCache } = pokemonSlice.actions;
+export const { clearSelected, clearCache, clearTypeFilter } =
+  pokemonSlice.actions;
 
 export default pokemonSlice.reducer;

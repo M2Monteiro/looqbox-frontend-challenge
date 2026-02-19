@@ -2,8 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
-import { fetchPokemonByName, fetchPokemons } from '../pokemon/pokemonSlice';
-import type { PokemonListItem } from '../pokemon/pokemonTypes';
+import {
+  clearTypeFilter,
+  fetchPokemonByName,
+  fetchPokemons,
+  fetchPokemonsByType,
+} from '../pokemon/pokemonSlice';
+import type {
+  PokemonListItem,
+  PokemonTypeResponse,
+} from '../pokemon/pokemonTypes';
 
 function filterPokemons(
   list: PokemonListItem[],
@@ -26,16 +34,17 @@ export function usePokemonList() {
   const [search, setSearch] = useState('');
 
   const dispatch = useAppDispatch();
-  const { list, loadingList, error } = useAppSelector((state) => state.pokemon);
+  const { list, filteredByType, typeFilter, loadingList, error } =
+    useAppSelector((state) => state.pokemon);
 
   useEffect(() => {
-    if (list.length === 0) {
+    if (list.length === 0 && !typeFilter) {
       dispatch(fetchPokemons());
     }
-  }, [dispatch]);
+  }, [dispatch, list.length, typeFilter]);
 
   useEffect(() => {
-    if (!search.trim()) return;
+    if (!search.trim() || typeFilter) return;
 
     const term = search.toLowerCase().trim();
     const found = list.some((p) => {
@@ -50,11 +59,26 @@ export function usePokemonList() {
 
       return () => clearTimeout(debounce);
     }
-  }, [search, list, dispatch]);
+  }, [search, list, dispatch, typeFilter]);
+
+  // Handler para clicar no tipo
+  const handleTypeClick = (type: string) => {
+    if (typeFilter === type) {
+      // Se clicar no mesmo tipo, remove o filtro
+      dispatch(clearTypeFilter());
+    } else {
+      // Busca pokémons desse tipo
+      dispatch(fetchPokemonsByType(type));
+      setSearch(''); // Limpa busca por nome
+    }
+  };
+
+  // Usa lista filtrada por tipo OU lista completa
+  const baseList = typeFilter ? filteredByType : list;
 
   const filteredList = useMemo(
-    () => filterPokemons(list, search),
-    [list, search]
+    () => filterPokemons(baseList, search),
+    [baseList, search]
   );
 
   return {
@@ -63,5 +87,7 @@ export function usePokemonList() {
     error,
     search,
     setSearch,
+    selectedType: typeFilter, // ← para NavBar saber qual tipo está ativo
+    onTypeClick: handleTypeClick, // ← callback para NavBar
   };
 }

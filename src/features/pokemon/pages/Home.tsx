@@ -1,4 +1,4 @@
-import { Col, Pagination, Row, Spin, Empty } from 'antd';
+import { Pagination, Spin, Empty } from 'antd';
 
 import { PokemonCard } from '../components/PokemonCard';
 import { PokemonNavBar } from '../components/PokemonNavBar';
@@ -9,7 +9,14 @@ import { usePokemonList } from '@/features/hooks/usePokemonList';
 import { usePokemonPagination } from '@/features/hooks/usePokemonPagination';
 
 export function PokemonHomePage() {
-  const { list: filteredPokemons, search, setSearch } = usePokemonList();
+  const {
+    list: filteredPokemons,
+    search,
+    setSearch,
+    selectedType,
+    onTypeClick,
+    loadingList: loadingSearch,
+  } = usePokemonList();
 
   const { listPagination, loadingPagination, pagination } =
     usePokemonPagination();
@@ -23,12 +30,23 @@ export function PokemonHomePage() {
   } = usePokemon();
 
   const isSearching = search.trim().length > 0;
-  const displayList = isSearching ? filteredPokemons : listPagination;
-  const isLoading = loadingPagination && !isSearching;
+  const isFilteringByType = selectedType !== null;
+
+  const displayList =
+    isSearching || isFilteringByType ? filteredPokemons : listPagination;
+
+  const isLoading = isFilteringByType
+    ? loadingSearch
+    : loadingPagination && !isSearching;
 
   return (
     <>
-      <PokemonNavBar search={search} onSearch={setSearch} />
+      <PokemonNavBar
+        search={search}
+        onSearch={setSearch}
+        selectedType={selectedType}
+        onTypeClick={onTypeClick}
+      />
 
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: 60 }}>
@@ -57,8 +75,9 @@ export function PokemonHomePage() {
             ))}
           </div>
 
-          {!isSearching && (
-            <div style={{ margin: 32, textAlign: 'center' }}>
+          {/* Só mostra paginação quando NÃO está buscando nem filtrando */}
+          {!isSearching && !isFilteringByType && (
+            <div style={{ margin: 32 }}>
               <Pagination align="center" {...pagination} />
             </div>
           )}

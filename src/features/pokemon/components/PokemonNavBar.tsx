@@ -49,10 +49,17 @@ const typeColors = {
 
 interface PokemonNavBarProps {
   search?: string;
+  selectedType?: string | null;
   onSearch: (text: string) => void;
+  onTypeClick: (type: string) => void;
 }
 
-export function PokemonNavBar({ search = '', onSearch }: PokemonNavBarProps) {
+export function PokemonNavBar({
+  search = '',
+  selectedType = null,
+  onSearch,
+  onTypeClick,
+}: PokemonNavBarProps) {
   return (
     <nav>
       <Row gutter={16}>
@@ -134,22 +141,31 @@ export function PokemonNavBar({ search = '', onSearch }: PokemonNavBarProps) {
       </Row>
 
       <div style={{ margin: '16px 0' }}>
-        {Object.entries(typeColors).map(([type, color]) => (
-          <Tag
-            key={type}
-            color={color}
-            style={{
-              fontSize: 12,
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              margin: '4px 6px 0px 6px',
-            }}
-          >
-            <Text>
-              {typeEmoji[type as keyof typeof typeEmoji]} {type}
-            </Text>
-          </Tag>
-        ))}
+        {Object.entries(typeColors).map(([type, color]) => {
+          const isSelected = selectedType === type;
+
+          return (
+            <Tag
+              key={type}
+              color={color}
+              onClick={() => onTypeClick(type)}
+              style={{
+                fontSize: 12,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                margin: '4px 6px 0px 6px',
+                opacity: isSelected ? 1 : 0.7,
+                transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                transition: 'all 0.2s ease',
+                border: isSelected ? '2px solid #fff' : 'none',
+              }}
+            >
+              <Text style={{ color: isSelected ? '#fff' : 'inherit' }}>
+                {typeEmoji[type as keyof typeof typeEmoji]} {type}
+              </Text>
+            </Tag>
+          );
+        })}
       </div>
       <Divider style={{ borderColor: '#7cb305' }} />
     </nav>

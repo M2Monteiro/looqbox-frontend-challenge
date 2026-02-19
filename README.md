@@ -3,5 +3,3 @@
 # Documentação
 
 # Testes unitários
-
-# Opcional listar pokemos por tipo
