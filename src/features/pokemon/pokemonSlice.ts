@@ -29,7 +29,11 @@ interface PokemonState {
   typeDetails: PokemonTypeResponse | null;
   loadingList: boolean;
   loadingDetails: boolean;
-  error: string | null;
+  errors: {
+    list: string | null;
+    details: string | null;
+    type: string | null;
+  };
   pagination: {
     count: number;
     next: string | null;
@@ -48,7 +52,11 @@ const initialState: PokemonState = {
   typeDetails: null,
   loadingList: false,
   loadingDetails: false,
-  error: null,
+  errors: {
+    list: null,
+    details: null,
+    type: null,
+  },
   pagination: {
     count: 0,
     next: null,
@@ -109,6 +117,13 @@ const pokemonSlice = createSlice({
       state.filteredByType = [];
       state.typeDetails = null;
     },
+    clearErrors(state) {
+      state.errors = {
+        list: null,
+        details: null,
+        type: null,
+      };
+    },
   },
 
   extraReducers: (builder) => {
@@ -117,12 +132,13 @@ const pokemonSlice = createSlice({
       // LISTA
       .addCase(fetchPokemons.pending, (state) => {
         state.loadingList = true;
-        state.error = null;
+        state.errors.list = null;
       })
 
       .addCase(fetchPokemons.fulfilled, (state, action) => {
         state.loadingList = false;
         state.list = action.payload.results;
+        state.errors.list = null;
 
         state.pagination.count = action.payload.count;
         state.pagination.next = action.payload.next;
@@ -142,15 +158,15 @@ const pokemonSlice = createSlice({
         // saveToStorage('pokemon-list', state.list);
       })
 
-      .addCase(fetchPokemons.rejected, (state) => {
+      .addCase(fetchPokemons.rejected, (state, action) => {
         state.loadingList = false;
-        state.error = 'Erro ao buscar pokémons';
+        state.errors.list = action.error.message || 'Erro ao buscar pokémons';
       })
 
       // DETALHE
       .addCase(fetchPokemonByName.pending, (state) => {
         state.loadingDetails = true;
-        state.error = null;
+        state.errors.details = null;
       })
 
       .addCase(fetchPokemonByName.fulfilled, (state, action) => {
@@ -159,6 +175,7 @@ const pokemonSlice = createSlice({
         state.loadingDetails = false;
         state.selected = pokemon;
         state.cache[pokemon.name] = pokemon;
+        state.errors.details = null;
 
         const alreadyInList = state.list.some((p) => p.name === pokemon.name);
         if (!alreadyInList) {
@@ -172,34 +189,38 @@ const pokemonSlice = createSlice({
         saveToStorage('pokemon-cache', state.cache);
       })
 
-      .addCase(fetchPokemonByName.rejected, (state) => {
+      .addCase(fetchPokemonByName.rejected, (state, action) => {
         state.loadingDetails = false;
-        state.error = 'Erro ao buscar Pokémon';
+        state.errors.details =
+          action.error.message || `Pokémon "${action.meta.arg}" não encontrado`;
       })
 
       // Types
       .addCase(fetchPokemonsByType.pending, (state) => {
         state.loadingList = true;
-        state.error = null;
+        state.errors.type = null;
       })
       .addCase(fetchPokemonsByType.fulfilled, (state, action) => {
         state.loadingList = false;
-
         state.typeDetails = action.payload;
+        state.errors.type = null;
+
         state.filteredByType = action.payload.pokemon.map((p: any) => ({
           name: p.pokemon.name,
           url: p.pokemon.url,
         }));
         state.typeFilter = action.meta.arg;
       })
-      .addCase(fetchPokemonsByType.rejected, (state) => {
+      .addCase(fetchPokemonsByType.rejected, (state, action) => {
         state.loadingList = false;
-        state.error = 'Erro ao buscar pokémons por tipo';
+        state.errors.type =
+          action.error.message ||
+          `Erro ao carregar pokémons do tipo "${action.meta.arg}"`;
       });
   },
 });
 
-export const { clearSelected, clearCache, clearTypeFilter } =
+export const { clearSelected, clearCache, clearTypeFilter, clearErrors } =
   pokemonSlice.actions;
 
 export default pokemonSlice.reducer;

@@ -7,6 +7,7 @@ import { PokemonModal } from '../components/PokemonModal';
 import { usePokemon } from '@/features/hooks/usePokemon';
 import { usePokemonList } from '@/features/hooks/usePokemonList';
 import { usePokemonPagination } from '@/features/hooks/usePokemonPagination';
+import { ErrorAlert } from '@/components/ErrorAlert';
 
 export function PokemonHomePage() {
   const {
@@ -47,6 +48,8 @@ export function PokemonHomePage() {
         selectedType={selectedType}
         onTypeClick={onTypeClick}
       />
+
+      <ErrorAlert />
 
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: 60 }}>
